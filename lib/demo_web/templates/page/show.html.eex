@@ -1,0 +1,12 @@
+<h1>Cards</h1>
+<a href="/view">
+<div class="cardcontainer">
+<%= Enum.with_index([1, 2, 3, 4, 5, 6]) |> Enum.map(fn {x, index} ->%>
+<div class="card" onClick="<%= toggle() %>">
+    <div class="cardtext">
+        <h5 class="text"><%= @variable %></h5>
+    </div>
+</div>
+<%end)%>
+</div>
+</a>
