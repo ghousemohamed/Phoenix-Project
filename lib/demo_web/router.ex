@@ -20,7 +20,8 @@ defmodule DemoWeb.Router do
     get "/", PageController, :index
     get "/view", PageController, :show
 
-    live("/live", CounterLive)
+    live "/live", CounterLive.Index
+    live "/live/product/:id", CounterLive.Product
   end
 
   # Other scopes may use custom stacks.

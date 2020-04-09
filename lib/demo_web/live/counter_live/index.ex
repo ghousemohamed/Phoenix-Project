@@ -1,5 +1,6 @@
-defmodule DemoWeb.CounterLive do
+defmodule DemoWeb.CounterLive.Index do
     use Phoenix.LiveView
+    alias DemoWeb.Router.Helpers, as: Routes
 
     @phones([
         %{ name: "iPhone", count: 0},
@@ -17,7 +18,7 @@ defmodule DemoWeb.CounterLive do
 
     def render(assigns) do
     ~L"""
-        <div class="close-cart">
+        <div class="close-cart" phx-click="close-cart">
       <div class="header">
         <p class="cart" phx-click="open-cart">Cart</p>
         <h1>Phoenix Demo Cart</h1>
@@ -27,7 +28,36 @@ defmodule DemoWeb.CounterLive do
       <%= if @isCartOpen do %>
           <div class="cart-modal">
             <%= if Enum.count(@items) === 0 do %>
-            <p class="empty-cart">You have no items in your cart...</p>
+              <div class="item-card">
+                <p class="remove"> Item 1</p>
+                <div>
+                  <div class="item-button">
+                    <%= 0 %>
+                    <button phx-click="dec" class="button-style">-</button>
+                    <button phx-click="inc" class="button-style">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="item-card">
+                <p class="remove"> Item 2</p>
+                <div>
+                  <div class="item-button">
+                    <%= 0 %>
+                    <button phx-click="dec" class="button-style">-</button>
+                    <button phx-click="inc" class="button-style">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="item-card">
+                <p class="remove"> Item 3</p>
+                <div>
+                  <div class="item-button">
+                    <%= 0 %>
+                    <button phx-click="dec" class="button-style">-</button>
+                    <button phx-click="inc" class="button-style">+</button>
+                  </div>
+                </div>
+              </div>
             <% else %>
               <%= for item <- @items do %>
                 <p>Working now<%= item %></p>
@@ -36,6 +66,7 @@ defmodule DemoWeb.CounterLive do
           </div>
         <% end %>
     </div>
+    <a phx-click="redirect" phx-value-page="<%= "Look for me" %>">Show</a>
         <h1 class="product-header">Products</h1>
       <div class="cardcontainer">
         <%= for phone <- @phones do %>
@@ -64,6 +95,14 @@ defmodule DemoWeb.CounterLive do
           isCartOpen: false,
           items: @items
         )}
+    end
+
+    def handle_event("close-cart", _, socket) do
+      {:noreply, update(socket, :isCartOpen, &(&1 = false))}
+    end
+
+    def handle_event("redirect", %{"page" => page}, socket) do
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, DemoWeb.CounterLive.Product, page))}
     end
 
     def handle_event("open-cart", _, socket) do

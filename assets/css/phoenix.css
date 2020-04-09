@@ -186,6 +186,7 @@ select {
   text-align: center;
   word-wrap: break-all;
   position: relative;
+  padding: 10px;
   z-index: 100;
 }
 
@@ -205,6 +206,26 @@ select {
 .product-header {
   padding: 30px;
   margin-left: 30px;
+}
+
+.item-card {
+  border-radius: 10px;
+  width: 100%;
+  background-color: lightskyblue;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  position: relative;
+}
+
+.item-button {
+  position: absolute;
+  right: 10px;
+}
+
+.remove {
+  padding: 0px;
+  margin: 0px;
 }
 
 @media (min-width: 40.0rem) { /* Small devices (landscape phones, 576px and up) */
