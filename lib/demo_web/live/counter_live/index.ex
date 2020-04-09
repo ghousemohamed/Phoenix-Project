@@ -14,8 +14,14 @@ defmodule DemoWeb.CounterLive.Index do
         %{ name: "HTC", count: 0},
         ])
     
-    @items([])
+    @items([
+      %{ name: "iPhone", count: 5},
+      %{ name: "One Plus", count: 4},
+      %{ name: "Huwawei", count: 3},
+    ])
 
+    new_items = []
+    
     def render(assigns) do
     ~L"""
         <div class="close-cart" phx-click="close-cart">
@@ -28,45 +34,22 @@ defmodule DemoWeb.CounterLive.Index do
       <%= if @isCartOpen do %>
           <div class="cart-modal">
             <%= if Enum.count(@items) === 0 do %>
-              <div class="item-card">
-                <p class="remove"> Item 1</p>
-                <div>
-                  <div class="item-button">
-                    <%= 0 %>
-                    <button phx-click="dec" class="button-style">-</button>
-                    <button phx-click="inc" class="button-style">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="item-card">
-                <p class="remove"> Item 2</p>
-                <div>
-                  <div class="item-button">
-                    <%= 0 %>
-                    <button phx-click="dec" class="button-style">-</button>
-                    <button phx-click="inc" class="button-style">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="item-card">
-                <p class="remove"> Item 3</p>
-                <div>
-                  <div class="item-button">
-                    <%= 0 %>
-                    <button phx-click="dec" class="button-style">-</button>
-                    <button phx-click="inc" class="button-style">+</button>
-                  </div>
-                </div>
-              </div>
+              <p class="empty-cart">There are no items in your cart...</p> 
             <% else %>
               <%= for item <- @items do %>
-                <p>Working now<%= item %></p>
+              <div class="item-card">
+                <p class="remove"><%= item.name %></p>
+                <div class="item-button">
+                  <button phx-click="dec" phx-value-name="<%= item.name %>" class="button-style">-</button>
+                  <%= item.count %>
+                  <button phx-click="inc" phx-value-name="<%= item.name %>" class="button-style">+</button>
+                </div>
+                </div>
               <% end %>
             <% end %>
           </div>
-        <% end %>
+        <% end %> 
     </div>
-    <a phx-click="redirect" phx-value-page="<%= "Look for me" %>">Show</a>
         <h1 class="product-header">Products</h1>
       <div class="cardcontainer">
         <%= for phone <- @phones do %>
@@ -74,8 +57,8 @@ defmodule DemoWeb.CounterLive.Index do
           <p class="card-heading"><%= phone.name %></p>
           <img src="https://ekameco.com/wp-content/uploads/2019/03/product-placeholder-300x300.jpg" class="image"/>
           <div class="button-group">
-            <button phx-click="dec" phx-value="<%= phone.name %>" class="button-style">-</button>
-            <button phx-click="inc" phx-value="<%= phone.name %>" class="button-style">+</button>
+            <button phx-click="dec" phx-value-name="<%= phone.name %>" class="button-style">-</button>
+            <button phx-click="inc" phx-value-name="<%= phone.name %>" phx-value-count="count" class="button-style">+</button>
           </div>
           </div>
         <% end %>
@@ -84,7 +67,6 @@ defmodule DemoWeb.CounterLive.Index do
       </div>
     """
     #   DemoWeb.CounterView.render("index.html", assigns)
-    #   DemoWeb.NewView.render("index.html", assigns)
     end
 
     def mount(_params, _session, socket) do
@@ -101,20 +83,46 @@ defmodule DemoWeb.CounterLive.Index do
       {:noreply, update(socket, :isCartOpen, &(&1 = false))}
     end
 
-    def handle_event("redirect", %{"page" => page}, socket) do
-      {:noreply, push_redirect(socket, to: Routes.live_path(socket, DemoWeb.CounterLive.Product, page))}
-    end
-
     def handle_event("open-cart", _, socket) do
       {:noreply, update(socket, :isCartOpen, &(!&1))}
     end
 
-    def handle_event("inc", _, socket) do
-      items = %{ name: "Phone added", count: 0}
-      {:noreply, update(socket|> put_flash(:info, "user created"), :items, &(&1 = items))}
+    def handle_event("inc", %{"name" => name}, socket) do
+      present = false
+      items = socket.assigns.items
+      mod_items = Enum.map(items, fn(item) -> 
+        if (item.name === name) do
+          %{
+            name: item.name,
+            count: item.count + 1
+          }
+        else
+          item
+        end
+      end)
+      if (present) do
+        items = mod_items ++ [%{ name: name, count: 1}]
+        {:noreply, update(socket, :items, &(&1 = items))}
+      else
+        {:noreply, update(socket, :items, &(&1 = mod_items))}
+      end
     end
 
-    def handle_event("dec", username, socket) do
-      {:noreply, update(socket, :val, &(&1 - 1))}
+    def handle_event("dec", %{"name" => name}, socket) do
+      items = socket.assigns.items
+      mod_items = Enum.map(items, fn(item) ->
+        if (item.name === name) do
+          %{
+            name: item.name,
+            count: item.count - 1
+          }
+        else
+         item
+        end
+      end)
+      after_remove = Enum.filter(mod_items, fn(item) ->
+        item.count !== 0
+      end)
+      {:noreply, update(socket, :items, &(&1 = after_remove))}
     end
 end
