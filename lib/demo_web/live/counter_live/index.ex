@@ -14,14 +14,10 @@ defmodule DemoWeb.CounterLive.Index do
         %{ name: "HTC", count: 0},
         ])
     
-    @items([
-      %{ name: "iPhone", count: 5},
-      %{ name: "One Plus", count: 4},
-      %{ name: "Huwawei", count: 3},
-    ])
+    @items([])
 
-    new_items = []
-    
+    @value "Hello world"
+
     def render(assigns) do
     ~L"""
         <div class="close-cart" phx-click="close-cart">
@@ -75,7 +71,7 @@ defmodule DemoWeb.CounterLive.Index do
           val: 0,
           phones: @phones,
           isCartOpen: false,
-          items: @items
+          items: @items,
         )}
     end
 
@@ -88,7 +84,6 @@ defmodule DemoWeb.CounterLive.Index do
     end
 
     def handle_event("inc", %{"name" => name}, socket) do
-      present = false
       items = socket.assigns.items
       mod_items = Enum.map(items, fn(item) -> 
         if (item.name === name) do
@@ -100,7 +95,8 @@ defmodule DemoWeb.CounterLive.Index do
           item
         end
       end)
-      if (present) do
+      socket = assign(socket, :items, mod_items)
+      if (socket.changed === %{} or !socket.changed.items) do
         items = mod_items ++ [%{ name: name, count: 1}]
         {:noreply, update(socket, :items, &(&1 = items))}
       else
